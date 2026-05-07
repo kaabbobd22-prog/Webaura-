@@ -16,7 +16,24 @@ import dashboardRoutes from './routes/dashboardRoutes.js';
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+// CORS কনফিগারেশন আপডেট করুন
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'https://webaura-client.vercel.app',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // যদি অরিজিন না থাকে (যেমন মোবাইল অ্যাপ বা পোস্টম্যান) অথবা লিস্টে থাকে
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 

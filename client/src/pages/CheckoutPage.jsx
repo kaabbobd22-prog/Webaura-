@@ -1,39 +1,84 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
+import { CheckCircle2, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
 import Button from '../components/Button';
 import { useCart } from '../context/CartContext';
 
 export default function CheckoutPage() {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [orderId, setOrderId] = useState('');
   const [form, setForm] = useState({ buyerName: '', buyerEmail: '', buyerPhone: '', agree: false });
 
-  if (!items.length) return <Navigate to="/cart" replace />;
+  if (!items.length && !isSuccess) return <Navigate to="/cart" replace />;
 
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post('/checkout/create-session', {
+      // '/orders' এর বদলে '/checkout' ব্যবহার করা হয়েছে যাতে ৪MD এরর না আসে
+      const response = await api.post('/checkout', {
         buyerName: form.buyerName,
         buyerEmail: form.buyerEmail,
         buyerPhone: form.buyerPhone,
-        items: items.map((item) => ({ productId: item._id }))
+        items: items.map((item) => ({ 
+          productId: item._id,
+          price: item.price,
+          title: item.title
+        })),
+        totalAmount: subtotal
       });
-      window.location.href = response.data.url;
+
+      setOrderId(response.data.orderId);
+      setIsSuccess(true);
+      clearCart();
     } catch (error) {
-      alert(error.response?.data?.message || 'Unable to start checkout.');
+      alert(error.response?.data?.message || 'Unable to process order.');
     } finally {
       setLoading(false);
     }
   };
 
+  if (isSuccess) {
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-24 text-center">
+        <div className="mb-6 flex justify-center">
+          <CheckCircle2 size={80} className="text-cyan-300" />
+        </div>
+        <h1 className="text-4xl font-black text-white">Order Received!</h1>
+        <p className="mt-4 text-lg text-slate-300">
+          Thank you, <span className="font-bold text-white">{form.buyerName}</span>. 
+          Your order has been placed successfully. 
+        </p>
+        <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-8 text-left">
+          <p className="text-xs font-bold uppercase tracking-widest text-cyan-300">Order Details</p>
+          <div className="mt-4 space-y-2">
+            <p className="text-slate-300">Order ID: <span className="text-white text-xs">{orderId}</span></p>
+            <p className="text-slate-300">Email: <span className="text-white">{form.buyerEmail}</span></p>
+            <p className="text-slate-300">Amount: <span className="text-white">${subtotal.toFixed(0)}</span></p>
+          </div>
+          <div className="mt-6 border-t border-white/10 pt-4">
+            <p className="text-sm italic text-slate-400">
+              Note: As payment is not yet configured, a support agent will contact you soon for final delivery.
+            </p>
+          </div>
+        </div>
+        <div className="mt-10">
+          <Link to="/shop">
+            <Button>Continue Shopping <ArrowRight size={18} className="ml-2 inline" /></Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">Checkout</p>
-        <h1 className="mt-3 text-4xl font-bold text-white">Fast, minimal, and ready for payment</h1>
+        <h1 className="mt-3 text-4xl font-bold text-white">Confirm your order details</h1>
       </div>
       <form onSubmit={submit} className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="card-shell p-6">
@@ -52,14 +97,17 @@ export default function CheckoutPage() {
               <input className="field" value={form.buyerPhone} onChange={(e) => setForm((s) => ({ ...s, buyerPhone: e.target.value }))} />
             </div>
           </div>
+          
           <div className="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-sm text-slate-300">
-            Payment is handled through Stripe Checkout. After payment, the success page confirms your order and reveals download links.
+            Currently, we are accepting manual orders. Once you submit, our team will review and contact you for the source code delivery.
           </div>
+
           <label className="mt-6 flex items-center gap-3 text-sm text-slate-300">
             <input type="checkbox" checked={form.agree} onChange={(e) => setForm((s) => ({ ...s, agree: e.target.checked }))} required />
-            I agree to the terms, digital delivery policy, and support window.
+            I agree to the terms and digital delivery policy.
           </label>
         </div>
+
         <aside className="card-shell h-fit p-6 lg:sticky lg:top-24">
           <h2 className="text-2xl font-bold text-white">Order summary</h2>
           <div className="mt-5 space-y-4">
@@ -78,7 +126,7 @@ export default function CheckoutPage() {
             <span className="text-2xl font-black text-white">${subtotal.toFixed(0)}</span>
           </div>
           <Button className="mt-6 w-full" type="submit" disabled={!form.agree || loading}>
-            {loading ? 'Redirecting…' : `Pay $${subtotal.toFixed(0)}`}
+            {loading ? 'Processing…' : `Confirm Order $${subtotal.toFixed(0)}`}
           </Button>
         </aside>
       </form>

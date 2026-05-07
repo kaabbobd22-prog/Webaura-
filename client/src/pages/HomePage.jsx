@@ -16,33 +16,42 @@ export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [settings, setSettings] = useState({});
+  const [loading, setLoading] = useState(true); // লোডিং স্টেট যোগ করা হয়েছে
 
   useEffect(() => {
+    // ডাটা ফেচিং শুরু
     Promise.all([
       api.get('/products?published=true&limit=8'),
       api.get('/categories'),
       api.get('/settings/public')
     ])
       .then(([productRes, categoryRes, settingsRes]) => {
-        setProducts(productRes.data.products || []);
-        setCategories(categoryRes.data.categories || []);
-        setSettings(settingsRes.data.settings || {});
+        // ডাটা সেট করার সময় সেফটি চেক
+        setProducts(productRes.data?.products || []);
+        setCategories(categoryRes.data?.categories || []);
+        setSettings(settingsRes.data?.settings || {});
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.error("API Fetch Error:", err); // এরর কনসোলে দেখা যাবে
+      })
+      .finally(() => {
+        setLoading(false); // লোডিং শেষ
+      });
   }, []);
 
   const featured = products.slice(0, 4);
 
+  // যদি ডাটা লোড হতে সময় নেয় বা না আসে, তবে ডিজাইন ভেঙে যাওয়া রোধ করবে
   return (
     <div>
       <section className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
         <div>
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-cyan-300">Single-vendor storefront</p>
           <h1 className="max-w-3xl text-5xl font-black tracking-tight text-white md:text-6xl">
-            {settings.heroTitle || 'Ready-Made Websites You Can Launch Today'}
+            {settings?.heroTitle || 'Ready-Made Websites You Can Launch Today'}
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            {settings.heroDescription || 'A focused marketplace for polished websites built by one creator. Preview live demos, purchase source code, and launch faster.'}
+            {settings?.heroDescription || 'A focused marketplace for polished websites built by one creator. Preview live demos, purchase source code, and launch faster.'}
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to="/shop"><Button>Browse Websites</Button></Link>
@@ -51,11 +60,17 @@ export default function HomePage() {
         </div>
         <div className="card-shell p-5">
           <div className="grid gap-4 md:grid-cols-2">
-            {featured.slice(0, 4).map((product) => <ProductCard key={product._id} product={product} compact />)}
+             {/* ম্যাপ করার আগে চেক করা হচ্ছে products আছে কি না */}
+            {featured.length > 0 ? (
+              featured.map((product) => <ProductCard key={product._id} product={product} compact />)
+            ) : (
+              !loading && <p className="text-slate-400">No featured products found.</p>
+            )}
           </div>
         </div>
       </section>
 
+      {/* Featured Sections */}
       <section className="mx-auto max-w-7xl px-6 py-10">
         <SectionHeading eyebrow="Featured websites" title="Hand-picked launch-ready templates" description="Fast-loading designs across business, portfolio, e-commerce, blog, and landing page categories." />
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -81,6 +96,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Trust Points and Custom Build sections remain unchanged as they don't depend on API data directly in a way that breaks layout */}
       <section className="mx-auto max-w-7xl px-6 py-10">
         <SectionHeading eyebrow="Why buy from me" title="A lean storefront built around trust and speed" />
         <div className="grid gap-6 md:grid-cols-3">
