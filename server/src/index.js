@@ -29,7 +29,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to Webaura API! Server is running smoothly." });
+});
 app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(500).json({ message: err.message || 'Server error' });
