@@ -37,3 +37,9 @@ textarea {
 .label {
   @apply mb-2 block text-sm font-medium text-slate-200;
 }
+.swiper-button-next, .swiper-button-prev {
+  color: #22d3ee !important; /* cyan-400 */
+}
+.swiper-pagination-bullet-active {
+  background: #22d3ee !important;
+}

@@ -22,7 +22,7 @@ export default function OrderSuccessPage() {
         setOrder(res.data.order);
         clearCart();
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [sessionId, clearCart]);
 

@@ -6,7 +6,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState('');
 
-  const load = () => api.get(`/orders${status ? `?status=${status}` : ''}`).then((res) => setOrders(res.data.orders || []));
+  const load = () => api.get(`/orders${status ? ` ? status = ${status}` : ''}`).then((res) => setOrders(res.data.orders || []));
   useEffect(() => { load(); }, [status]);
 
   return (

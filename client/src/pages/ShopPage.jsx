@@ -13,14 +13,14 @@ export default function ShopPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get(`/products?published=true${category ? `&category=${category}` : ''}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
+      api.get(`/products?published=true${category ? ` & category=${category}` : ''}${search ? ` & search=${encodeURIComponent(search)}` : ''}`),
       api.get('/categories')
     ])
       .then(([productRes, categoryRes]) => {
         setProducts(productRes.data.products || []);
         setCategories(categoryRes.data.categories || []);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [category, search]);
 
   const total = useMemo(() => products.length, [products]);

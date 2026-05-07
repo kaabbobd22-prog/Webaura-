@@ -16,110 +16,120 @@ export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [settings, setSettings] = useState({});
-  const [loading, setLoading] = useState(true); // লোডিং স্টেট যোগ করা হয়েছে
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ডাটা ফেচিং শুরু
     Promise.all([
       api.get('/products?published=true&limit=8'),
       api.get('/categories'),
       api.get('/settings/public')
     ])
       .then(([productRes, categoryRes, settingsRes]) => {
-        // ডাটা সেট করার সময় সেফটি চেক
         setProducts(productRes.data?.products || []);
         setCategories(categoryRes.data?.categories || []);
         setSettings(settingsRes.data?.settings || {});
       })
-      .catch((err) => {
-        console.error("API Fetch Error:", err); // এরর কনসোলে দেখা যাবে
-      })
-      .finally(() => {
-        setLoading(false); // লোডিং শেষ
-      });
+      .catch((err) => console.error("API Fetch Error:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const featured = products.slice(0, 4);
 
-  // যদি ডাটা লোড হতে সময় নেয় বা না আসে, তবে ডিজাইন ভেঙে যাওয়া রোধ করবে
   return (
     <div>
-      <section className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-        <div>
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-cyan-300">Single-vendor storefront</p>
-          <h1 className="max-w-3xl text-5xl font-black tracking-tight text-white md:text-6xl">
-            {settings?.heroTitle || 'Ready-Made Websites You Can Launch Today'}
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            {settings?.heroDescription || 'A focused marketplace for polished websites built by one creator. Preview live demos, purchase source code, and launch faster.'}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Link to="/shop"><Button>Browse Websites</Button></Link>
-            <Link to="/custom"><Button variant="secondary">Request a Custom Build</Button></Link>
+      {/* --- Simple & Clean Hero Section --- */}
+      <section className="relative overflow-hidden pt-24 pb-20 md:pt-32 md:pb-28">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <div className="mx-auto max-w-4xl">
+            <p className="mb-6 text-sm font-semibold uppercase tracking-[0.4em] text-cyan-400">
+              Premium Source Code Store
+            </p>
+            <h1 className="text-5xl font-black tracking-tight text-white md:text-7xl lg:leading-[1.1]">
+              {settings?.heroTitle || 'Launch Your Next Website Today'}
+            </h1>
+            <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-slate-400 md:text-xl">
+              {settings?.heroDescription || 'High-quality, ready-made websites built for speed and conversion. Pick a template, get the code, and go live instantly.'}
+            </p>
+            <div className="mt-12 flex flex-wrap justify-center gap-5">
+              <Link to="/shop">
+                <Button className="px-10 py-7 text-lg">Browse Catalog</Button>
+              </Link>
+              <Link to="/custom">
+                <Button variant="secondary" className="px-10 py-7 text-lg">Custom Request</Button>
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="card-shell p-5">
-          <div className="grid gap-4 md:grid-cols-2">
-             {/* ম্যাপ করার আগে চেক করা হচ্ছে products আছে কি না */}
-            {featured.length > 0 ? (
-              featured.map((product) => <ProductCard key={product._id} product={product} compact />)
-            ) : (
-              !loading && <p className="text-slate-400">No featured products found.</p>
-            )}
-          </div>
-        </div>
+        
+        {/* Decorative background element for "Gravy" feel */}
+        <div className="absolute top-0 left-1/2 -z-10 h-[600px] w-full -translate-x-1/2 bg-[radial-gradient(circle_farthest-side_at_50%_0,rgba(34,211,238,0.08),transparent)]" />
       </section>
 
-      {/* Featured Sections */}
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <SectionHeading eyebrow="Featured websites" title="Hand-picked launch-ready templates" description="Fast-loading designs across business, portfolio, e-commerce, blog, and landing page categories." />
+      {/* --- Featured Sections --- */}
+      <section className="mx-auto max-w-7xl px-6 py-12">
+        <SectionHeading 
+          eyebrow="Featured" 
+          title="Hand-picked templates" 
+          description="Optimized for performance and clean architecture." 
+        />
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {featured.map((product) => <ProductCard key={product._id} product={product} compact />)}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <SectionHeading eyebrow="Categories" title="Jump straight to the style you need" />
-        <div className="flex flex-wrap gap-3">
-          {categories.map((category) => (
-            <Link key={category._id} to={`/shop?category=${category.slug}`} className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 hover:border-cyan-300 hover:text-white">
-              {category.name}
-            </Link>
-          ))}
+      {/* --- Categories --- */}
+      <section className="mx-auto max-w-7xl px-6 py-12">
+        <div className="flex flex-wrap items-center justify-between gap-6 rounded-3xl border border-white/5 bg-white/[0.02] p-8">
+          <div>
+            <h3 className="text-xl font-bold text-white">Browse by category</h3>
+            <p className="text-sm text-slate-400 mt-1">Find the perfect style for your project</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <Link 
+                key={category._id} 
+                to={`/shop?category=${category.slug}`} 
+                className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-slate-300 transition-all hover:border-cyan-400 hover:text-white hover:bg-cyan-400/5"
+              >
+                {category.name}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <SectionHeading eyebrow="Catalog" title="All websites" description="Twelve-column friendly catalog cards, optimized for quick scanning and confident buying." />
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {products.map((product) => <ProductCard key={product._id} product={product} />)}
-        </div>
-      </section>
-
-      {/* Trust Points and Custom Build sections remain unchanged as they don't depend on API data directly in a way that breaks layout */}
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <SectionHeading eyebrow="Why buy from me" title="A lean storefront built around trust and speed" />
+      {/* --- Why Buy Section --- */}
+      <section className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-6 md:grid-cols-3">
           {trustPoints.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="card-shell p-6">
-              <div className="mb-4 inline-flex rounded-2xl bg-cyan-400/15 p-3 text-cyan-300"><Icon size={22} /></div>
-              <h3 className="text-xl font-semibold text-white">{title}</h3>
-              <p className="mt-3 text-slate-300">{text}</p>
+            <div key={title} className="card-shell p-8 text-center md:text-left">
+              <div className="mb-5 inline-flex rounded-2xl bg-cyan-400/10 p-4 text-cyan-400">
+                <Icon size={26} />
+              </div>
+              <h3 className="text-xl font-bold text-white">{title}</h3>
+              <p className="mt-3 leading-relaxed text-slate-400">{text}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="card-shell flex flex-col items-start justify-between gap-8 p-8 md:flex-row md:items-center">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">Custom builds</p>
-            <h3 className="mt-3 text-3xl font-bold text-white">Need something unique?</h3>
-            <p className="mt-3 max-w-2xl text-slate-300">Share your scope, budget, and timeline. I’ll review your request and send a tailored quote.</p>
+      {/* --- Custom Build Call-to-Action --- */}
+      <section className="mx-auto max-w-7xl px-6 py-20">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-900 to-slate-950 p-10 md:p-16 border border-white/5">
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <p className="text-sm font-bold uppercase tracking-widest text-cyan-400">Custom Projects</p>
+            <h3 className="mt-4 text-4xl font-black text-white md:text-5xl">Need something unique?</h3>
+            <p className="mt-6 max-w-2xl text-lg text-slate-400">
+              If our ready-made templates don't fit your needs, let's build a custom solution tailored to your vision.
+            </p>
+            <Link to="/custom" className="mt-10">
+              <Button className="gap-3 px-8 py-6 text-base">
+                Start a Custom Project <ArrowRight size={20} />
+              </Button>
+            </Link>
           </div>
-          <Link to="/custom" className="inline-flex items-center gap-3 rounded-2xl bg-cyan-400 px-6 py-4 font-semibold text-slate-950 hover:bg-cyan-300">
-            Request a custom website <ArrowRight size={18} />
-          </Link>
+          {/* Subtle background glow */}
+          <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-cyan-500/10 blur-[100px]" />
         </div>
       </section>
     </div>

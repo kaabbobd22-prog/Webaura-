@@ -8,8 +8,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // মোবাইল মেনুর স্টেট
 
   const navLinkClass = ({ isActive }) =>
-    `text-sm font-medium transition-colors ${
-      isActive ? 'text-cyan-300' : 'text-slate-300 hover:text-white'
+    `text-sm font-medium transition-colors ${isActive ? 'text-cyan-300' : 'text-slate-300 hover:text-white'
     }`;
 
   // মোবাইল মেনু ক্লোজ করার ফাংশন
@@ -18,7 +17,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        
+
         {/* Logo */}
         <Link to="/" className="text-xl font-bold text-white" onClick={closeMenu}>
           Web<span className="text-cyan-300">Launch</span>
@@ -34,8 +33,8 @@ export default function Header() {
 
         {/* Right Actions (Cart & Mobile Menu Button) */}
         <div className="flex items-center gap-4">
-          <Link 
-            to="/cart" 
+          <Link
+            to="/cart"
             className="relative rounded-full border border-white/10 p-3 text-white hover:bg-white/10"
             onClick={closeMenu}
           >
@@ -48,7 +47,7 @@ export default function Header() {
           </Link>
 
           {/* Mobile Menu Toggle Button */}
-          <button 
+          <button
             className="rounded-full border border-white/10 p-3 text-white hover:bg-white/10 md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >

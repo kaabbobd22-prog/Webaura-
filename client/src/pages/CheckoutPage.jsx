@@ -4,6 +4,7 @@ import { CheckCircle2, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
 import Button from '../components/Button';
 import { useCart } from '../context/CartContext';
+import { formatPrice } from '../lib/utils'; // utils ইমপোর্ট করা হলো
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
@@ -18,12 +19,11 @@ export default function CheckoutPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      // '/orders' এর বদলে '/checkout' ব্যবহার করা হয়েছে যাতে ৪MD এরর না আসে
       const response = await api.post('/checkout', {
         buyerName: form.buyerName,
         buyerEmail: form.buyerEmail,
         buyerPhone: form.buyerPhone,
-        items: items.map((item) => ({ 
+        items: items.map((item) => ({
           productId: item._id,
           price: item.price,
           title: item.title
@@ -49,19 +49,19 @@ export default function CheckoutPage() {
         </div>
         <h1 className="text-4xl font-black text-white">Order Received!</h1>
         <p className="mt-4 text-lg text-slate-300">
-          Thank you, <span className="font-bold text-white">{form.buyerName}</span>. 
-          Your order has been placed successfully. 
+          Thank you, <span className="font-bold text-white">{form.buyerName}</span>.
+          Your order has been placed successfully.
         </p>
         <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-8 text-left">
           <p className="text-xs font-bold uppercase tracking-widest text-cyan-300">Order Details</p>
           <div className="mt-4 space-y-2">
             <p className="text-slate-300">Order ID: <span className="text-white text-xs">{orderId}</span></p>
             <p className="text-slate-300">Email: <span className="text-white">{form.buyerEmail}</span></p>
-            <p className="text-slate-300">Amount: <span className="text-white">${subtotal.toFixed(0)}</span></p>
+            <p className="text-slate-300">Amount: <span className="text-white">{formatPrice(subtotal)}</span></p>
           </div>
           <div className="mt-6 border-t border-white/10 pt-4">
             <p className="text-sm italic text-slate-400">
-              Note: As payment is not yet configured, a support agent will contact you soon for final delivery.
+              Note: As payment is not yet configured, our support agent will contact you soon for final delivery.
             </p>
           </div>
         </div>
@@ -97,7 +97,7 @@ export default function CheckoutPage() {
               <input className="field" value={form.buyerPhone} onChange={(e) => setForm((s) => ({ ...s, buyerPhone: e.target.value }))} />
             </div>
           </div>
-          
+
           <div className="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-sm text-slate-300">
             Currently, we are accepting manual orders. Once you submit, our team will review and contact you for the source code delivery.
           </div>
@@ -117,16 +117,16 @@ export default function CheckoutPage() {
                   <p className="font-semibold text-white">{item.title}</p>
                   <p className="text-slate-400">Source code + docs</p>
                 </div>
-                <p className="font-semibold text-white">${Number(item.price).toFixed(0)}</p>
+                <p className="font-semibold text-white">{formatPrice(item.price)}</p>
               </div>
             ))}
           </div>
           <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-6">
             <span className="text-slate-300">Total</span>
-            <span className="text-2xl font-black text-white">${subtotal.toFixed(0)}</span>
+            <span className="text-2xl font-black text-white">{formatPrice(subtotal)}</span>
           </div>
           <Button className="mt-6 w-full" type="submit" disabled={!form.agree || loading}>
-            {loading ? 'Processing…' : `Confirm Order $${subtotal.toFixed(0)}`}
+            {loading ? 'Processing…' : `Confirm Order - ${formatPrice(subtotal)}`}
           </Button>
         </aside>
       </form>
