@@ -1,0 +1,17 @@
+{
+  "name": "website-marketplace",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w client\" \"npm run dev -w server\"",
+    "build": "npm run build -w client",
+    "seed:admin": "npm run seed:admin -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

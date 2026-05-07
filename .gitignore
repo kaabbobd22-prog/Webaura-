@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+.env
+.env.local
+coverage
+.DS_Store
+client/dist
+server/node_modules
+client/node_modules
+server/uploads/*
+!server/uploads/.gitkeep
